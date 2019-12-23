@@ -1,0 +1,29 @@
+SalesItem	Widgets - $1 apiece(100) $5 / Widgets - $0.50 apiece (1000) $5
+	-ItemName      
+	-Description
+	
+Inventory
+	-ItemId
+	-PurchasePrice
+	-RetailPrice
+	-Quantity
+	-PurchaseDate
+
+Sale
+	-SaleDate
+	-SubTotal
+	-Tax
+	-Total
+	-CashierId
+
+SaleDetail
+	-SaleId
+	-SalesItem
+	-PurchasePrice
+	-Quantity
+
+User
+	-FirstName
+	-LastName
+	-EmailAddress
+	-UserId
