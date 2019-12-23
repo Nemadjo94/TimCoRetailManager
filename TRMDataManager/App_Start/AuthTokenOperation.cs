@@ -7,9 +7,10 @@ using System.Web.Http.Description;
 
 namespace TRMDataManager.App_Start
 {
-    // Add new route in auth category
+    
     public class AuthTokenOperation : IDocumentFilter
     {
+        // Adds new route in auth category for getting back tokens
         public void Apply(SwaggerDocument swaggerDoc, SchemaRegistry schemaRegistry, IApiExplorer apiExplorer)
         {
             swaggerDoc.paths.Add("/token", new PathItem

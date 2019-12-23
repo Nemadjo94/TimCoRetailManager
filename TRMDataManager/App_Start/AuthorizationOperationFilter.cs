@@ -9,7 +9,7 @@ namespace TRMDataManager.App_Start
 {
     public class AuthorizationOperationFilter : IOperationFilter
     {
-        // Add a parameter to every operation
+        // Adds a mandatory token parameter to every operation
         public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
         {
             if(operation.parameters == null)
