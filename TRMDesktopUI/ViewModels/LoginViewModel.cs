@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using TRMDesktopUI.Helpers;
+using TRMDesktopUI.Library.Api;
 
 namespace TRMDesktopUI.ViewModels
 {
@@ -91,7 +91,11 @@ namespace TRMDesktopUI.ViewModels
             try 
             {
                 ErrorMessage = String.Empty;
+                //1.Authenticate
                 var result = await _apiHelper.Authenticate(UserName, Password);
+
+                //2.Capture more information about the user in the model
+                await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
             }
             catch(Exception exc)
             {

@@ -18,16 +18,14 @@ namespace TRMDataManager.Controllers
        // GET: api/User/
        [HttpGet]
        [Route("GetById")]
-       public List<UserModel> GetById()
+       public UserModel GetById()
         {
             // Get current logged in user id
             string userId = RequestContext.Principal.Identity.GetUserId();
 
             UserData data = new UserData();
 
-            var result = data.GetUserById(userId);
-
-            return result;
+            return data.GetUserById(userId).First();
         }
     }
 }
