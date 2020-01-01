@@ -12,14 +12,24 @@ namespace TRMDesktopUI.Library.Api
 {
     public class APIHelper : IAPIHelper
     {
-        private HttpClient ApiClient { get; set; }
-        private ILoggedInUserModel _loggedInUserModel { get; set; }
+        private HttpClient _apiClient;
+        private ILoggedInUserModel _loggedInUserModel;
 
         public APIHelper(ILoggedInUserModel loggedInUserModel)
         {
-            _loggedInUserModel = loggedInUserModel;
             // This makes sure we only have one client open during the app time so we don't clog the network
             InitializeClient();
+
+            _loggedInUserModel = loggedInUserModel;
+            
+        }
+
+        public HttpClient ApiClient
+        {
+            get
+            {
+                return _apiClient;
+            }
         }
 
         private void InitializeClient()
@@ -27,10 +37,10 @@ namespace TRMDesktopUI.Library.Api
             // Gets the api url from app.config file 
             string api = ConfigurationManager.AppSettings["api"];
 
-            ApiClient = new HttpClient(); // we dont want multiple http clients open so we must configure singleton
-            ApiClient.BaseAddress = new Uri(api);
-            ApiClient.DefaultRequestHeaders.Accept.Clear();
-            ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _apiClient = new HttpClient(); // we dont want multiple http clients open so we must configure singleton
+            _apiClient.BaseAddress = new Uri(api);
+            _apiClient.DefaultRequestHeaders.Accept.Clear();
+            _apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task<AuthenticatedUser> Authenticate(string username, string password)
@@ -43,7 +53,7 @@ namespace TRMDesktopUI.Library.Api
                 new KeyValuePair<string, string>("password", password),
             });
 
-            using (HttpResponseMessage response = await ApiClient.PostAsync("/Token", data))
+            using (HttpResponseMessage response = await _apiClient.PostAsync("/Token", data))
             {
                 if (response.IsSuccessStatusCode)
                 {
@@ -58,12 +68,12 @@ namespace TRMDesktopUI.Library.Api
 
         public async Task GetLoggedInUserInfo(string token)
         {
-            ApiClient.DefaultRequestHeaders.Clear();
-            ApiClient.DefaultRequestHeaders.Accept.Clear();//?
-            ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+            _apiClient.DefaultRequestHeaders.Clear();
+            _apiClient.DefaultRequestHeaders.Accept.Clear();//?
+            _apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _apiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-            using (HttpResponseMessage response = await ApiClient.GetAsync("/api/User/GetById"))
+            using (HttpResponseMessage response = await _apiClient.GetAsync("/api/User/GetById"))
             {
                 if (response.IsSuccessStatusCode)
                 {

@@ -5,17 +5,45 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TRMDesktopUI.Library.Api;
+using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
 {
     public class SalesViewModel : Screen
     {
-        private BindingList<string> _products;
+        private BindingList<ProductModel> _products;
         private int _itemQuantity;
-        private BindingList<string> _cart;
+        private BindingList<ProductModel> _cart;
+        private IProductEndpoint _productEndpoint;
+
+        public SalesViewModel(IProductEndpoint productEndpoint)
+        {
+            _productEndpoint = productEndpoint;
+        }
+
+        /// <summary>
+        /// Fires an event after page is loaded and await loads a list of products
+        /// </summary>
+        /// <param name="view"></param>
+        protected override async void OnViewLoaded(object view)
+        {
+            base.OnViewLoaded(view);
+            await LoadProducts();
+        }
+
+        /// <summary>
+        /// Load products from api
+        /// </summary>
+        /// <returns></returns>
+        private async Task LoadProducts()
+        {
+            var productsList = await _productEndpoint.GetAll();
+            Products = new BindingList<ProductModel>(productsList);
+        }
 
         // Since binding list auto binds, notification should not be a problem
-        public BindingList<string> Products
+        public BindingList<ProductModel> Products
         {
             get { return _products; }
             set 
@@ -35,7 +63,7 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
-        public BindingList<string> Cart
+        public BindingList<ProductModel> Cart
         {
             get { return _cart; }
             set

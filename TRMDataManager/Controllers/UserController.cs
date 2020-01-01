@@ -23,7 +23,7 @@ namespace TRMDataManager.Controllers
             // Get current logged in user id
             string userId = RequestContext.Principal.Identity.GetUserId();
 
-            UserData data = new UserData();
+            UserData data = new UserData(); // replace with DI
 
             return data.GetUserById(userId).First();
         }
