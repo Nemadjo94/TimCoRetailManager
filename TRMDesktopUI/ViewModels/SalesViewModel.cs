@@ -13,9 +13,10 @@ namespace TRMDesktopUI.ViewModels
     public class SalesViewModel : Screen
     {
         private BindingList<ProductModel> _products;
-        private int _itemQuantity;
-        private BindingList<ProductModel> _cart;
+        private int _itemQuantity = 1;
+        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
         private IProductEndpoint _productEndpoint;
+        private ProductModel _selectedProduct;
 
         public SalesViewModel(IProductEndpoint productEndpoint)
         {
@@ -60,10 +61,11 @@ namespace TRMDesktopUI.ViewModels
             {
                 _itemQuantity = value;
                 NotifyOfPropertyChange(() => ItemQuantity);
+                NotifyOfPropertyChange(() => CanAddToCart);
             }
         }
 
-        public BindingList<ProductModel> Cart
+        public BindingList<CartItemModel> Cart
         {
             get { return _cart; }
             set
@@ -73,10 +75,31 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
+        public ProductModel SelectedProduct
+        {
+            get { return _selectedProduct; }
+            set
+            {
+                _selectedProduct = value;
+                NotifyOfPropertyChange(() => SelectedProduct);
+                NotifyOfPropertyChange(() => CanAddToCart);
+            }
+        }
+
         public string SubTotal
         {
-            // TODO - Replace with calculation
-            get { return "$0.00";  }
+            
+            get
+            {
+                decimal subTotal = 0;
+
+                foreach(var item in Cart)
+                {
+                    subTotal += item.Product.RetailPrice * item.QuantityInCart; 
+                }
+
+                return subTotal.ToString("C");  
+            }
         }
 
         public string Total
@@ -99,6 +122,10 @@ namespace TRMDesktopUI.ViewModels
 
                 // Make sure something is selected 
                 // Make sure there is an item quantity
+                if(ItemQuantity > 0 && SelectedProduct?.QuantityInStock >= ItemQuantity)
+                {
+                    output = true;
+                }
 
                 return output;
             }
@@ -131,12 +158,36 @@ namespace TRMDesktopUI.ViewModels
 
         public void AddToCart()
         {
+            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
 
+            if(existingItem != null)
+            {
+                // Update an existing item quantity so we dont have duplicate products in cart
+                existingItem.QuantityInCart += ItemQuantity;
+
+                // Triggers quantity refresh - could be done better
+                Cart.Remove(existingItem);
+                Cart.Add(existingItem);
+            }
+            else
+            {
+                CartItemModel item = new CartItemModel
+                {
+                    Product = SelectedProduct,
+                    QuantityInCart = ItemQuantity
+                };
+
+                Cart.Add(item);
+            }
+            
+            SelectedProduct.QuantityInStock -= ItemQuantity; // Subtrack from item quantity
+            ItemQuantity = 1; // Reset item quantity back to 1
+            NotifyOfPropertyChange(() => SubTotal);
         }
 
         public void RemoveFromCart()
         {
-
+            NotifyOfPropertyChange(() => SubTotal);
         }
 
         public void CheckOut()
