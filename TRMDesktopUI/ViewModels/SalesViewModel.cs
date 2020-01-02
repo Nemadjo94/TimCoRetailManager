@@ -128,13 +128,9 @@ namespace TRMDesktopUI.ViewModels
             decimal taxAmount = 0;
             decimal taxRate = _configHelper.GetTaxRate() / 100; // Transform from percent to decimal
 
-            foreach (var item in Cart)
-            {
-                if (item.Product.IsTaxable)
-                {
-                    taxAmount += (item.Product.RetailPrice * item.QuantityInCart * taxRate);
-                }
-            }
+            taxAmount = Cart
+                .Where(x => x.Product.IsTaxable) // Only taxable products
+                .Sum(x => x.Product.RetailPrice * x.QuantityInCart * taxRate); 
 
             return taxAmount;
         }
