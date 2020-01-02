@@ -14,18 +14,17 @@ namespace TRMDesktopUI.ViewModels
         
         private IEventAggregator _eventAggregator;
         private SalesViewModel _salesViewModel;
-        private SimpleContainer _container;
 
-        public ShellViewModel( IEventAggregator eventAggregator, SalesViewModel salesViewModel, SimpleContainer container)
+        public ShellViewModel( IEventAggregator eventAggregator, SalesViewModel salesViewModel)
         {
             
-            _eventAggregator = eventAggregator;
-            _eventAggregator.Subscribe(this); // Subscribe this class to the event aggregator
+            _eventAggregator = eventAggregator;   
             _salesViewModel = salesViewModel;
-            _container = container;
 
+            _eventAggregator.Subscribe(this); // Subscribe this class to the event aggregator
+            
             // Starts LoginView, and since its not a singleton we get a fresh instance
-            ActivateItem(_container.GetInstance<LoginViewModel>());
+            ActivateItem(IoC.Get<LoginViewModel>());
         }
 
         public void Handle(LogOnEventModel message)
