@@ -18,7 +18,8 @@ namespace TRMDesktopUI.ViewModels
         private BindingList<ProductDisplayModel> _products;
         private int _itemQuantity = 1;
         private BindingList<CartItemDisplayModel> _cart = new BindingList<CartItemDisplayModel>();
-        private ProductDisplayModel _selectedProduct; 
+        private ProductDisplayModel _selectedProduct;
+        private CartItemDisplayModel _selectedCartItem;
         private IProductEndpoint _productEndpoint;
         private IConfigHelper _configHelper;
         private ISaleEndpoint _saleEndpoint;
@@ -96,6 +97,17 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
+        public CartItemDisplayModel SelectedCartItem
+        {
+            get { return _selectedCartItem; }
+            set
+            {
+                _selectedCartItem = value;
+                NotifyOfPropertyChange(() => SelectedCartItem);
+                NotifyOfPropertyChange(() => CanRemoveFromCart);
+            }
+        }
+
         public string SubTotal
         {
             
@@ -159,7 +171,7 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
-        public bool CanRemoveToCart
+        public bool CanRemoveFromCart
         {
             get
             {
@@ -167,6 +179,10 @@ namespace TRMDesktopUI.ViewModels
 
                 // Make sure something is selected 
                 // Make sure there is an item quantity
+                if(SelectedCartItem != null && SelectedCartItem?.Product.QuantityInStock >= 0)
+                {
+                    output = true;
+                }
 
                 return output;
             }
@@ -223,6 +239,18 @@ namespace TRMDesktopUI.ViewModels
 
         public void RemoveFromCart()
         {
+            // BUG: when whole quantity is selected into cart, remove from cart button greys out
+            SelectedCartItem.Product.QuantityInStock += 1;
+            if (SelectedCartItem.QuantityInCart > 1)
+            {
+                SelectedCartItem.QuantityInCart -= 1;
+            }
+            else
+            {           
+                Cart.Remove(SelectedCartItem);
+                NotifyOfPropertyChange(() => CanAddToCart);
+            }
+
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
