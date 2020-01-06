@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDesktopUI.EventModels;
+using TRMDesktopUI.Library.Helpers;
+using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
 {
@@ -14,23 +16,59 @@ namespace TRMDesktopUI.ViewModels
         
         private IEventAggregator _eventAggregator;
         private SalesViewModel _salesViewModel;
+        private ILoggedInUserModel _loggedInUserModel;
 
-        public ShellViewModel( IEventAggregator eventAggregator, SalesViewModel salesViewModel)
+        public ShellViewModel( IEventAggregator eventAggregator, SalesViewModel salesViewModel, ILoggedInUserModel loggedInUserModel)
         {
             
             _eventAggregator = eventAggregator;   
             _salesViewModel = salesViewModel;
-
+            _loggedInUserModel = loggedInUserModel;
             _eventAggregator.Subscribe(this); // Subscribe this class to the event aggregator
             
             // Starts LoginView, and since its not a singleton we get a fresh instance
             ActivateItem(IoC.Get<LoginViewModel>());
         }
 
+        public bool IsAccountVisible
+        {
+
+            get
+            {
+                bool output = false;
+
+                if(string.IsNullOrWhiteSpace(_loggedInUserModel.Id) == false)
+                {
+                    output = true;
+                }
+
+                return output;
+
+            }            
+        }
+
+        public void LogOut()
+        {
+            // Reset login credentials
+            UserHelper.LogOffUser(_loggedInUserModel);
+
+            // Starts LoginView, and since its not a singleton we get a fresh instance
+            ActivateItem(IoC.Get<LoginViewModel>());
+
+            NotifyOfPropertyChange(() => IsAccountVisible);
+        }
+
+        public void ExitApplication()
+        {
+            this.TryClose();
+        }
+
         public void Handle(LogOnEventModel message)
         {
             // After user logs in, event is triggered and the SalesView window opens
-            ActivateItem(_salesViewModel);           
+            ActivateItem(_salesViewModel);
+
+            NotifyOfPropertyChange(() => IsAccountVisible);
         }
     }
 }

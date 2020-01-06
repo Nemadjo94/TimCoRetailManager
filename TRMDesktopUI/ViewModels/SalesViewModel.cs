@@ -270,10 +270,26 @@ namespace TRMDesktopUI.ViewModels
                     Quantity = item.QuantityInCart
                 });
             }
-
+            // Add exception handlers
             // call api
             await _saleEndpoint.PostSale(sale);
-            Console.WriteLine(sale);
+            // reset the page so the products are updated after sale
+            await ResetSalesViewModel();
+        }
+
+        /// <summary>
+        /// After check out reset the whole view
+        /// </summary>
+        private async Task ResetSalesViewModel()
+        {
+            Cart = new BindingList<CartItemDisplayModel>(); // Reset the cart
+            // TODO: Add clearing the selectedCartItem 
+            await LoadProducts(); // Load products again 
+
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
     }
 }

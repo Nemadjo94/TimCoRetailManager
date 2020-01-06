@@ -56,6 +56,7 @@
     <Compile Include="Api\SaleEndpoint.cs" />
     <Compile Include="Helpers\ConfigHelper.cs" />
     <Compile Include="Helpers\IConfigHelper.cs" />
+    <Compile Include="Helpers\UserHelper.cs" />
     <Compile Include="Models\AuthenticatedUser.cs" />
     <Compile Include="Models\CartItemModel.cs" />
     <Compile Include="Models\ILoggedInUserModel.cs" />
