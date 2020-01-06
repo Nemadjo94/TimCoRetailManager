@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDesktopUI.EventModels;
+using TRMDesktopUI.Library.Api;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
 
@@ -17,13 +18,15 @@ namespace TRMDesktopUI.ViewModels
         private IEventAggregator _eventAggregator;
         private SalesViewModel _salesViewModel;
         private ILoggedInUserModel _loggedInUserModel;
+        private IAPIHelper _apiHelper;
 
-        public ShellViewModel( IEventAggregator eventAggregator, SalesViewModel salesViewModel, ILoggedInUserModel loggedInUserModel)
+        public ShellViewModel( IEventAggregator eventAggregator, SalesViewModel salesViewModel, ILoggedInUserModel loggedInUserModel, IAPIHelper apiHelper)
         {
             
             _eventAggregator = eventAggregator;   
             _salesViewModel = salesViewModel;
             _loggedInUserModel = loggedInUserModel;
+            _apiHelper = apiHelper;
             _eventAggregator.Subscribe(this); // Subscribe this class to the event aggregator
             
             // Starts LoginView, and since its not a singleton we get a fresh instance
@@ -51,7 +54,7 @@ namespace TRMDesktopUI.ViewModels
         {
             // Reset login credentials
             UserHelper.LogOffUser(_loggedInUserModel);
-
+            _apiHelper.LogOffUser(); // We need to clear the request header from all the authorization info after user logs out
             // Starts LoginView, and since its not a singleton we get a fresh instance
             ActivateItem(IoC.Get<LoginViewModel>());
 

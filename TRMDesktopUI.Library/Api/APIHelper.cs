@@ -93,5 +93,13 @@ namespace TRMDesktopUI.Library.Api
                 }
             }
         }
+
+        /// <summary>
+        /// Clears the default request headers
+        /// </summary>
+        public void LogOffUser()
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+        }
     }
 }
