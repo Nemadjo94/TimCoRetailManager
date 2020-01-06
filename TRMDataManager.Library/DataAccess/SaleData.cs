@@ -30,7 +30,7 @@ namespace TRMDataManager.Library.DataAccess
                 // Get the information about this product
                 var productInfo = productData.GetProductById(detail.ProductId);
 
-                if(productInfo == null)
+                if (productInfo == null)
                 {
                     throw new Exception($"The product Id of {detail.ProductId} could not be found it the database.");
                 }
@@ -56,23 +56,55 @@ namespace TRMDataManager.Library.DataAccess
 
             saleToSave.Total = saleToSave.SubTotal + saleToSave.Tax;
 
-            // Save sale model
-            SqlDataAccess sql = new SqlDataAccess();
+            #region Old - Replaced with transaction
+            //// Save sale model
+            //SqlDataAccess sql = new SqlDataAccess();
 
-            sql.SaveData<SaleDBModel>("dbo.spSaleInsert", saleToSave, "TRMData");
+            //sql.SaveData<SaleDBModel>("dbo.spSaleInsert", saleToSave, "TRMData");
 
+            ////Get the ID from sale model // i dont want to have id in model because of identity increment
+            //var saleToSave_Id = sql.LoadData<int, dynamic>("spSaleLookup", new { CachierId = saleToSave.CachierId, SaleDate = saleToSave.SaleDate }, "TRMData").FirstOrDefault();
 
-            //Get the ID from sale model // i dont want to have id in model because of identity increment
-            var saleToSave_Id = sql.LoadData<int, dynamic>("spSaleLookup", new { CachierId = saleToSave.CachierId, SaleDate = saleToSave.SaleDate }, "TRMData").FirstOrDefault();
+            //// Finish filling in the sale detail models
+            //foreach (var item in saleDetails)
+            //{
+            //    item.SaleId = saleToSave_Id;
 
-            // Finish filling in the sale detail models
-            foreach (var item in saleDetails)
+            //    // Save the sale detail model
+            //    sql.SaveData("dbo.spSaleDetailInsert", item, "TRMData");
+            //}
+            #endregion
+
+            using (SqlDataAccess sql = new SqlDataAccess()) // ok
             {
-                item.SaleId = saleToSave_Id;
+                try
+                {
+                    sql.StartTransaction("TRMData");
 
-                // Save the sale detail model
-                sql.SaveData("dbo.spSaleDetailInsert", item, "TRMData");
+                    // Save the sale model
+                    sql.SaveDataInTransaction("dbo.spSaleInsert", saleToSave);
+
+                    //Get the ID from sale model
+                    var saleToSave_Id = sql.LoadDataInTransaction<int, dynamic>("spSaleLookup", new { CachierId = saleToSave.CachierId, SaleDate = saleToSave.SaleDate }).FirstOrDefault();
+
+                    // Finish filling in the sale detail models
+                    foreach (var item in saleDetails)
+                    {
+                        item.SaleId = saleToSave_Id;
+
+                        // Save the sale detail model
+                        sql.SaveDataInTransaction("dbo.spSaleDetailInsert", item);
+                    }
+
+                    sql.CommitTransaction();
+                }
+                catch (Exception exc)
+                {
+                    sql.RollbackTransaction();
+                    throw exc;
+                }
             }
         }
     }
 }
+

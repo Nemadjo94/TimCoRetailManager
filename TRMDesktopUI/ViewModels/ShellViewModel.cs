@@ -53,7 +53,7 @@ namespace TRMDesktopUI.ViewModels
         public void LogOut()
         {
             // Reset login credentials
-            UserHelper.LogOffUser(_loggedInUserModel);
+            UserHelper.ResetUserModel(_loggedInUserModel);
             _apiHelper.LogOffUser(); // We need to clear the request header from all the authorization info after user logs out
             // Starts LoginView, and since its not a singleton we get a fresh instance
             ActivateItem(IoC.Get<LoginViewModel>());

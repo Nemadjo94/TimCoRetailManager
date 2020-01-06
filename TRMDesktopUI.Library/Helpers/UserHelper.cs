@@ -10,7 +10,7 @@ namespace TRMDesktopUI.Library.Helpers
     public static class UserHelper
     {
         // Clear out logged in user data
-        public static void LogOffUser(ILoggedInUserModel userModel)
+        public static void ResetUserModel(ILoggedInUserModel userModel)
         {
             userModel.Id = "";
             userModel.Token = "";
