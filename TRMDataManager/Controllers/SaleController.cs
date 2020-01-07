@@ -11,11 +11,11 @@ using TRMDataManager.Models;
 
 namespace TRMDataManager.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [RoutePrefix("api/Sale")]
     public class SaleController : ApiController
     {
-        // GET: api/Sale/
+        // POST: api/Sale/
         [HttpPost]
         [Route("PostSale")]
         public void PostSale(SaleModel sale)
@@ -25,6 +25,16 @@ namespace TRMDataManager.Controllers
             string userId = RequestContext.Principal.Identity.GetUserId();
 
             data.SaveSale(sale, userId);
+        }
+
+        // GET: api/Sale/
+        [HttpGet]
+        [Route("GetSalesReport")]
+        public List<SaleReportModel> GetSalesReport()
+        {
+            SaleData data = new SaleData();
+
+            return data.GetSalesReport();
         }
     }
 }
