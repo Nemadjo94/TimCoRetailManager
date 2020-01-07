@@ -3,9 +3,11 @@ using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using TRMDesktopUI.Library.Api;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
@@ -20,17 +22,21 @@ namespace TRMDesktopUI.ViewModels
         private BindingList<CartItemDisplayModel> _cart = new BindingList<CartItemDisplayModel>();
         private ProductDisplayModel _selectedProduct;
         private CartItemDisplayModel _selectedCartItem;
+        private readonly StatusInfoViewModel _status;
+        private readonly IWindowManager _window;
         private IProductEndpoint _productEndpoint;
         private IConfigHelper _configHelper;
         private ISaleEndpoint _saleEndpoint;
         private IMapper _mapper;
 
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint, IMapper mapper)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint, IMapper mapper, StatusInfoViewModel status, IWindowManager window)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndpoint = saleEndpoint;
             _mapper = mapper;
+            _status = status;
+            _window = window;
         }
 
         /// <summary>
@@ -38,9 +44,23 @@ namespace TRMDesktopUI.ViewModels
         /// </summary>
         /// <param name="view"></param>
         protected override async void OnViewLoaded(object view)
-        {
+        { 
             base.OnViewLoaded(view);
-            await LoadProducts();
+            try
+            {       
+                await LoadProducts();
+            }
+            catch (Exception)
+            {
+                dynamic settings = new ExpandoObject();
+                settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                settings.ResizeMode = ResizeMode.NoResize;
+                settings.Title = "System Message";
+
+                _status.UpdateMessage("Unauthorized Access", "You do not have permission to interact with the Sales Form");
+                _window.ShowDialog(_status, null, settings);
+                TryClose();
+            }
         }
 
         /// <summary>
