@@ -66,6 +66,12 @@ namespace TRMDesktopUI.ViewModels
             this.TryClose();
         }
 
+        public void UserManagement()
+        {
+            // Starts LoginView, and since its not a singleton we get a fresh instance
+            ActivateItem(IoC.Get<UserDisplayViewModel>());
+        }
+
         public void Handle(LogOnEventModel message)
         {
             // After user logs in, event is triggered and the SalesView window opens
